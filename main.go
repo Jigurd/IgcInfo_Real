@@ -6,6 +6,7 @@ import (
     "github.com/marni/goigc"
     "log"
     "net/http"
+    "os"
     "regexp"
     "strconv"
     "strings"
@@ -178,8 +179,14 @@ func main() {
     LastID = 0
     ids = IDArray{make([]string, 0)}
 
+    //set port. if no port, default to 8080
+    port := ":"+os.Getenv("PORT")
+    if ( port == ""){
+        port = "8080";
+    }
+
     apiStruct = Metadata{Uptime: "", Info:"Info for IGC tracks.", Version: "v1" }
 	http.HandleFunc("/igcinfo/api/", handlerAPI)
     http.HandleFunc("/igcinfo/api/igc/", handlerIGC)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(port, nil))
 }
