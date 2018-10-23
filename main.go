@@ -179,11 +179,11 @@ func main() {
     LastID = 0
     ids = IDArray{make([]string, 0)}
 
-    //set port. if no port, default to 8080
+    //set port. if no port, default to 8080 (well not at the moment but you know, in theory)
     port := ":"+os.Getenv("PORT")
-    if ( port == ""){
-        port = "8080";
-    }
+    //if ( port == ""){
+    //    port = "8080";
+    //}
 
     apiStruct = Metadata{Uptime: "", Info:"Info for IGC tracks.", Version: "v1" }
 	http.HandleFunc("/igcinfo/api/", handlerAPI)
