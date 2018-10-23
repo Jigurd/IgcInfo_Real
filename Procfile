@@ -1,1 +1,1 @@
-web: igcinfo-jigurd
+web: main.go
