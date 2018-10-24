@@ -7,7 +7,6 @@ import (
     "log"
     "net/http"
     "os"
-    "regexp"
     "strconv"
     "strings"
     "time"
@@ -53,19 +52,27 @@ var ids IDArray
 // HANDLERS
 
 func handlerAPI(w http.ResponseWriter, r *http.Request) {
-    //finding uptime
-    //I only track uptime until the point of days, as I find it unlikely that this service would
-    //be running for weeks on end, let alone months or years.
-    elapsedTime := time.Since(start)
-    apiStruct.Uptime = fmt.Sprintf("P%dD%dH%dM%dS",
-        int(elapsedTime.Hours()/24),    //number of days (no Days method available)
-        int(elapsedTime.Hours())%24,    //number of hours
-        int(elapsedTime.Minutes())%60,  //number of minutes
-        int(elapsedTime.Seconds())%60,  //number of seconds
-        )
-    json.NewEncoder(w).Encode(apiStruct)
 
+    //check that there is no rubbish behind api
+    if r.URL.Path == "/paragliding/api" || r.URL.Path == "/paragliding/api/"{
+
+        //finding uptime
+        //I only track uptime until the point of days, as I find it unlikely that this service would
+        //be running for weeks on end, let alone months or years.
+        elapsedTime := time.Since(start)
+        apiStruct.Uptime = fmt.Sprintf("P%dD%dH%dM%dS",
+            int(elapsedTime.Hours()/24),    //number of days (no Days method available)
+            int(elapsedTime.Hours())%24,    //number of hours
+            int(elapsedTime.Minutes())%60,  //number of minutes
+            int(elapsedTime.Seconds())%60,  //number of seconds
+            )
+        json.NewEncoder(w).Encode(apiStruct)
+
+    } else {
+        // if there is rubbish behind /api/, return 404
+        http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
     }
+}
 
 func handlerIGC(w http.ResponseWriter, r *http.Request) {
     if (r.Method=="POST"){
@@ -157,13 +164,21 @@ func handlerIGC(w http.ResponseWriter, r *http.Request) {
     }
 }
 
+func handlerAPIRedirect(w http.ResponseWriter, r *http.Request){
 
-//Utility Functions
+    if r.URL.Path == "/paragliding" || r.URL.Path == "/paragliding/"{
+        //if there is nothing after paragliding in the URL, redirect to API
+        http.Redirect(w, r, "/paragliding/api/", http.StatusSeeOther)
+    } else {
+        //else return 404
+        http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+    }
 
-func isNumeric(s string) bool { //Checks whether given string is numeric
-value, _ := regexp.MatchString("[0-9]+", s)
-return value
 }
+
+
+
+//UTILITY FUNCTIONS
 
 func totalDistance(t igc.Track) string {
     track := t
@@ -179,14 +194,15 @@ func main() {
     LastID = 0
     ids = IDArray{make([]string, 0)}
 
-    //set port. if no port, default to 8080 (well not at the moment but you know, in theory)
+   // set port. if no port, default to 8080 (well not at the moment but you know, in theory)
     port := ":"+os.Getenv("PORT")
-    //if ( port == ":"){
-    //    port = "8080";
-    //}
+    if ( port == ":"){
+        port = ":8080";
+    }
 
-    apiStruct = Metadata{Uptime: "", Info:"Info for IGC tracks.", Version: "v1" }
-	http.HandleFunc("/igcinfo/api/", handlerAPI)
-    http.HandleFunc("/igcinfo/api/igc/", handlerIGC)
+    apiStruct = Metadata{Uptime: "", Info:"Info for paragliding tracks.", Version: "v1" }
+    http.HandleFunc("/paragliding/", handlerAPIRedirect)
+	http.HandleFunc("/paragliding/api/", handlerAPI)
+    http.HandleFunc("/paragliding/api/igc/", handlerIGC)
 	log.Fatal(http.ListenAndServe(port, nil))
 }
