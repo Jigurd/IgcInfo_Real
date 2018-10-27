@@ -4,7 +4,6 @@ import (
     "encoding/json"
     "fmt"
     "github.com/marni/goigc"
-    "gopkg.in/mgo.v2/bson"
     "net/http"
     "strconv"
     "strings"
@@ -68,7 +67,7 @@ func HandlerTrack(w http.ResponseWriter, r *http.Request) {
         if err == nil{ //if there is no problem with the parse
 
             encode := Track{ //encode track JSON
-                bson.NewObjectId(),
+                //bson.NewObjectId(),
                 track.Date,
                 track.Pilot,
                 track.GliderType,
@@ -77,7 +76,7 @@ func HandlerTrack(w http.ResponseWriter, r *http.Request) {
                 urlRequest.URL,
                 Millisec(),
             }
-            fmt.Sprintf("track id:%v",encode.Timestamp) //return the id
+            fmt.Fprintf(w, "track id:%v",encode.Timestamp) //return the id
             db.Add(encode) //add to the database
         } else {
             http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
@@ -93,7 +92,6 @@ func HandlerTrack(w http.ResponseWriter, r *http.Request) {
         if !isNumeric(requestString) && requestString!="" {
             //check if the ID is numeric (and that the request was not for all tracks
             http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-            fmt.Fprint(w, "\nThis is the first bad request block!")
 
         }else{
         requestedID, _ := strconv.ParseInt(requestString, 10, 64)
@@ -104,36 +102,36 @@ func HandlerTrack(w http.ResponseWriter, r *http.Request) {
 
             case 5: //if a single track is requested
                 track, err := db.Get(requestedID) //try to fetch track by ID
-                track = Track{
-                    track.Id,
-                    track.Hdate,
-                    track.Pilot,
-                    track.Glider,
-                    track.GliderID,
-                    track.TrackLength,
-                    track.TrackURL,
-                    track.Timestamp,
-                 }
+                //track = Track{
+                //    track.Id,
+                //    track.Hdate,
+                //    track.Pilot,
+                //    track.Glider,
+                //    track.GliderID,
+                //    track.TrackLength,
+                //    track.TrackURL,
+                //    track.Timestamp,
+                //}
 
                 if err==nil { //if that works, return it
                     http.Header.Add(w.Header(), "content-type", "application/json")
-                    json.NewEncoder(w).Encode(requestedID)
+                    json.NewEncoder(w).Encode(track)
                 }else{ //if this track could not be fetched, throw 404
                     http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
                 }
 
             case 6: //if a single field is requested
                 track, err :=db.Get(requestedID) //copy the track
-                track = Track{
-                    track.Id,
-                    track.Hdate,
-                    track.Pilot,
-                    track.Glider,
-                    track.GliderID,
-                    track.TrackLength,
-                    track.TrackURL,
-                    track.Timestamp,
-                }
+                //track = Track{
+                //    track.Id,
+                //    track.Hdate,
+                //    track.Pilot,
+                //    track.Glider,
+                //    track.GliderID,
+                //    track.TrackLength,
+                //    track.TrackURL,
+                //    track.Timestamp,
+                //}
                 if err != nil{ //if that doesn't work throw 404
                     http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
                 }else{  //if it does, return selected field
@@ -152,9 +150,8 @@ func HandlerTrack(w http.ResponseWriter, r *http.Request) {
                             fmt.Fprintf(w, "%v", track.TrackLength)
                         case "track_src_url":
                             fmt.Fprintf(w, "%v", track.TrackURL)
-                        default: //
-                            http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-                            fmt.Fprint(w, "\nSomething messed up here too tbh")
+                        default: //Throw Bad Request
+                            http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
                         }
                 }
             default:

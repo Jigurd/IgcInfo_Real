@@ -5,7 +5,6 @@ import (
     "net/http"
     "os"
     "time"
-    "gopkg.in/mgo.v2/bson"
 )
 
 //JSON Structs
@@ -23,7 +22,7 @@ type Metadata struct {
 
 //Track ... stores metadata about track
 type Track struct {
-    Id        bson.ObjectId `bson:"_id,omitempty"`
+    //Id        bson.ObjectId `bson:"_id,omitempty"`
     Hdate time.Time `json:"H_date"`
     Pilot string  `json:"pilot"`
     Glider string `json:"glider"`
