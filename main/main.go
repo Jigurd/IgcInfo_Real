@@ -6,13 +6,7 @@ import (
     "os"
     "time"
 )
-
-//JSON Structs
-
-//IDArray ... Array keeping track of all IDs.
-type IDArray struct {
-    Ids []string `json:"ids"`
-}
+//JSON STRUCTS
 //Metadata ... stores metadata about app
 type Metadata struct {
 	Uptime 	string 	`json:"uptime"`
@@ -49,16 +43,12 @@ type URLRequest struct {
 //global variables
 var apiStruct Metadata //contains meta information
 var start = time.Now() //keeps track of uptime
-var LastID int //keeps track of used IDs
 
 
 //global structs
 var db DBInfo //help struct that contains info about the Database
 
-//arrays
-var tracks = []Track{}//make(map[string]Track)
 
-var ids IDArray
 
 
 //MAIN
@@ -67,8 +57,6 @@ func main() {
     db.CollectionName = "tracks"
     db.DBurl = "mongodb://admin1:admin1@ds141813.mlab.com:41813/trackdb"
 
-    LastID = 0
-    ids = IDArray{make([]string, 0)}
 
    // set port. if no port, default to 8080 (well not at the moment but you know, in theory)
     port := ":"+os.Getenv("PORT")
@@ -78,9 +66,9 @@ func main() {
     db.Init()
 
     apiStruct = Metadata{Uptime: "", Info:"Info for paragliding tracks.", Version: "v1" }
-    http.HandleFunc("/paragliding/", HandlerAPIRedirect)
+    http.HandleFunc("/paragliding/api/track/", HandlerTrack)
+    http.HandleFunc("/paragliding/api/ticker/", HandlerTicker)
 	http.HandleFunc("/paragliding/api/", HandlerAPI)
-    http.HandleFunc("/paragliding/api/track", HandlerTrack)
-    http.HandleFunc("/paragliding/api/ticker", HandlerTicker)
+    http.HandleFunc("/paragliding/", HandlerAPIRedirect)
 	log.Fatal(http.ListenAndServe(port, nil))
 }

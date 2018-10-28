@@ -73,19 +73,16 @@ func (db *DBInfo) Get(keyID int64) (Track, error) {
     defer session.Close()
 
     track := Track{}
-    //allWasGood := err
+
 
     err = session.DB(db.DBname).C(db.CollectionName).Find(bson.M{"timestamp": keyID}).One(&track)
-    //if err != nil {
-    //    allWasGood = false
-    //}
 
     return track, err
 }
 
 
 //returns one field from a track as a string
-func (db *DBInfo) GetField(keyID string, field string) (string, bool) {
+func (db *DBInfo) GetField(keyID int64, field string) (string, bool) {
     session, err := mgo.Dial(db.DBurl)
     if err != nil {
         panic(err)

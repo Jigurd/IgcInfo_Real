@@ -15,7 +15,7 @@ import (
 func HandlerAPI(w http.ResponseWriter, r *http.Request) {
 
     //check that there is no rubbish behind api
-    if r.URL.Path == "/paragliding/api" || r.URL.Path == "/paragliding/api/"{
+    //if r.URL.Path == "/paragliding/api" || r.URL.Path == "/paragliding/api/"{
 
         //finding uptime
         //I only track uptime until the point of days, as I find it unlikely that this service would
@@ -29,10 +29,11 @@ func HandlerAPI(w http.ResponseWriter, r *http.Request) {
         )
         json.NewEncoder(w).Encode(apiStruct)
 
-    } else {
-        // if there is rubbish behind /api/, return 404
-        http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-    }
+    //} else {
+    //    // if there is rubbish behind /api/, return 404
+    //    http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+    //    fmt.Fprint(w, "It was I, Judas!")
+    //}
 }
 
 //Redirects requests from root to API
@@ -44,6 +45,7 @@ func HandlerAPIRedirect(w http.ResponseWriter, r *http.Request){
     } else {
         //else return 404
         http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+        fmt.Fprint(w, "You're bad and should feel bad (failed to resolve URL)")
     }
 
 }
@@ -112,39 +114,20 @@ func HandlerTrack(w http.ResponseWriter, r *http.Request) {
 
             case 5: //if a single track is requested
                 track, err := db.Get(requestedID) //try to fetch track by ID
-                //track = Track{
-                //    track.Id,
-                //    track.Hdate,
-                //    track.Pilot,
-                //    track.Glider,
-                //    track.GliderID,
-                //    track.TrackLength,
-                //    track.TrackURL,
-                //    track.Timestamp,
-                //}
 
                 if err==nil { //if that works, return it
                     http.Header.Add(w.Header(), "content-type", "application/json")
                     json.NewEncoder(w).Encode(track)
                 }else{ //if this track could not be fetched, throw 404
                     http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-                    fmt.Fprint(w, "Why are we here, just to suffer?")
+                    fmt.Fprint(w, "\nWhy are we still here, just to suffer?")
                 }
 
             case 6: //if a single field is requested
                 track, err :=db.Get(requestedID) //copy the track
-                //track = Track{
-                //    track.Id,
-                //    track.Hdate,
-                //    track.Pilot,
-                //    track.Glider,
-                //    track.GliderID,
-                //    track.TrackLength,
-                //    track.TrackURL,
-                //    track.Timestamp,
-                //}
                 if err != nil{ //if that doesn't work throw 404
                     http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+                    fmt.Fprint(w, "\nEvery night, I feel my leg")
                 }else{  //if it does, return selected field
                     switch strings.ToLower(parts[5]) {
                         case "glider":
@@ -167,7 +150,7 @@ func HandlerTrack(w http.ResponseWriter, r *http.Request) {
                 }
             default:
                 http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-                fmt.Fprint(w, "\noops I did a booboo")
+                fmt.Fprint(w, "\nMy arm, even my fingers")
             }
             //sjekk om vi har å gjøre med get array, get track, eller get field
             //hvis get array
