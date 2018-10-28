@@ -31,7 +31,7 @@ type Track struct {
 type DBInfo struct {
     DBurl string
     DBname string
-    CollectionName string
+    TrackCollection string
 
 }
 
@@ -54,7 +54,7 @@ var db DBInfo //help struct that contains info about the Database
 //MAIN
 func main() {
     db.DBname = "trackdb"
-    db.CollectionName = "tracks"
+    db.TrackCollection = "tracks"
     db.DBurl = "mongodb://admin1:admin1@ds141813.mlab.com:41813/trackdb"
 
 
@@ -67,7 +67,7 @@ func main() {
 
     apiStruct = Metadata{Uptime: "", Info:"Info for paragliding tracks.", Version: "v1" }
     http.HandleFunc("/paragliding/api/track/", HandlerTrack)
-    http.HandleFunc("/paragliding/api/ticker/", HandlerTicker)
+    http.HandleFunc("/paragliding/api/ticker", HandlerTicker)
 	http.HandleFunc("/paragliding/api/", HandlerAPI)
     http.HandleFunc("/paragliding/", HandlerAPIRedirect)
 	log.Fatal(http.ListenAndServe(port, nil))

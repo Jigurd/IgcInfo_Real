@@ -15,7 +15,7 @@ import (
 func HandlerAPI(w http.ResponseWriter, r *http.Request) {
 
     //check that there is no rubbish behind api
-    //if r.URL.Path == "/paragliding/api" || r.URL.Path == "/paragliding/api/"{
+   if r.URL.Path == "/paragliding/api" || r.URL.Path == "/paragliding/api/"{
 
         //finding uptime
         //I only track uptime until the point of days, as I find it unlikely that this service would
@@ -29,11 +29,11 @@ func HandlerAPI(w http.ResponseWriter, r *http.Request) {
         )
         json.NewEncoder(w).Encode(apiStruct)
 
-    //} else {
-    //    // if there is rubbish behind /api/, return 404
-    //    http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-    //    fmt.Fprint(w, "It was I, Judas!")
-    //}
+   } else {
+       // if there is rubbish behind /api/, return 404
+       http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+       fmt.Fprint(w, "It was I, Judas!")
+   }
 }
 
 //Redirects requests from root to API
@@ -41,7 +41,7 @@ func HandlerAPIRedirect(w http.ResponseWriter, r *http.Request){
 
     if r.URL.Path == "/paragliding" || r.URL.Path == "/paragliding/"{
         //if there is nothing after paragliding in the URL, redirect to API
-        http.Redirect(w, r, "/paragliding/api/", http.StatusSeeOther)
+        http.Redirect(w, r, "/paragliding/api", http.StatusSeeOther)
     } else {
         //else return 404
         http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -99,9 +99,10 @@ func HandlerTrack(w http.ResponseWriter, r *http.Request) {
         }else{
         requestedID, _ := strconv.ParseInt(requestString, 10, 64)
 
-            switch len(parts) {
-            case 4: //if the entire array is requested
-
+            //the OR clause in the following if statements are to deal with trailing slashes.
+            //We check whether an URL is of the correct length, or if the last segment of the URL is blank.
+            if len(parts)==4 || (len(parts)==5 && parts[4]==""){
+                //when entire array is requested
                 tracks := db.GetAll() //add all tracks to array
                 var ids []int64
 
@@ -112,7 +113,8 @@ func HandlerTrack(w http.ResponseWriter, r *http.Request) {
                 json.NewEncoder(w).Encode(ids)
                 //fmt.Fprint(w, "This space for rent\n")
 
-            case 5: //if a single track is requested
+            } else if len(parts)==5 ||(len(parts)==6 &&parts[5]==""){
+                //when single ID is requested
                 track, err := db.Get(requestedID) //try to fetch track by ID
 
                 if err==nil { //if that works, return it
@@ -120,48 +122,42 @@ func HandlerTrack(w http.ResponseWriter, r *http.Request) {
                     json.NewEncoder(w).Encode(track)
                 }else{ //if this track could not be fetched, throw 404
                     http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-                    fmt.Fprint(w, "\nWhy are we still here, just to suffer?")
+                    fmt.Fprint(w, "\nWhy are we still here, just to suffer?\n", requestedID)
                 }
 
-            case 6: //if a single field is requested
+            }else if len(parts)==6|| (len(parts)==7 &&parts[6]==""){
+                //when a single field is requested
+                //This is an inefficient way of retrieving a field, but the GetField function in database.go
+                //was not willing to cooperate, so this is the hack I ended up with.
                 track, err :=db.Get(requestedID) //copy the track
                 if err != nil{ //if that doesn't work throw 404
                     http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
                     fmt.Fprint(w, "\nEvery night, I feel my leg")
                 }else{  //if it does, return selected field
                     switch strings.ToLower(parts[5]) {
-                        case "glider":
-                            fmt.Fprintf(w, track.Glider)
-                        case "glider_id":
-                            fmt.Fprintf(w, track.GliderID)
-                        case "h_date":
-                            fmt.Fprintf(w, "%v", track.Hdate)
-                        case "pilot":
-                            fmt.Fprintf(w, track.Pilot)
-                        case "timestamp":
-                            fmt.Fprintf(w, "%v", track.Timestamp)
-                        case "track_length":
-                            fmt.Fprintf(w, "%v", track.TrackLength)
-                        case "track_src_url":
-                            fmt.Fprintf(w, "%v", track.TrackURL)
-                        default: //Throw Bad Request
-                            http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-                        }
+                    case "glider":
+                        fmt.Fprintf(w, track.Glider)
+                    case "glider_id":
+                        fmt.Fprintf(w, track.GliderID)
+                    case "h_date":
+                        fmt.Fprintf(w, "%v", track.Hdate)
+                    case "pilot":
+                        fmt.Fprintf(w, track.Pilot)
+                    case "timestamp":
+                        fmt.Fprintf(w, "%v", track.Timestamp)
+                    case "track_length":
+                        fmt.Fprintf(w, "%v", track.TrackLength)
+                    case "track_src_url":
+                        fmt.Fprintf(w, "%v", track.TrackURL)
+                    default: //Throw Bad Request
+                        http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+                    }
                 }
-            default:
+
+            }else{
                 http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
                 fmt.Fprint(w, "\nMy arm, even my fingers")
             }
-            //sjekk om vi har å gjøre med get array, get track, eller get field
-            //hvis get array
-            //hent timestamp for alle objekter fra db
-            //returner array med alle IDer
-            //hvis get track
-            //request track fra db
-            //returner den som json
-            //hvis get $FIELD
-            //request $FIELD fra db
-            //returner $FIELD
         }
     }
 }

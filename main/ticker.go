@@ -19,7 +19,7 @@ type Ticker struct{
 }
 
 func HandlerTicker(w http.ResponseWriter, r *http.Request){
-    //This is in an incredibly inefficient way to do this kind of operation, but I couldn't forthe life of me get
+    //This is in an incredibly inefficient way to do this kind of operation, but I couldn't for the life of me get
     //the GetField function in database.go to cooperate. So, we're stuck with this.
 
     requestStartTime := Millisec()  //mark start of function

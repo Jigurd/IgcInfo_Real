@@ -21,7 +21,7 @@ func (db *DBInfo) Init() {
         Sparse:     true,
     }
 
-    err = session.DB(db.DBname).C(db.CollectionName).EnsureIndex(index)
+    err = session.DB(db.DBname).C(db.TrackCollection).EnsureIndex(index)
     if err != nil {
         panic(err)
     }
@@ -36,7 +36,7 @@ func (db *DBInfo) Add(s Track) error {
     }
     defer session.Close()
 
-    err = session.DB(db.DBname).C(db.CollectionName).Insert(s)
+    err = session.DB(db.DBname).C(db.TrackCollection).Insert(s)
 
     if err != nil {
         fmt.Printf("error in Insert(): %v", err.Error())
@@ -55,7 +55,7 @@ func (db *DBInfo) Count() int {
     defer session.Close()
 
     // handle to "db"
-    count, err := session.DB(db.DBname).C(db.CollectionName).Count()
+    count, err := session.DB(db.DBname).C(db.TrackCollection).Count()
     if err != nil {
         fmt.Printf("error in Count(): %v", err.Error())
         return -1
@@ -75,7 +75,7 @@ func (db *DBInfo) Get(keyID int64) (Track, error) {
     track := Track{}
 
 
-    err = session.DB(db.DBname).C(db.CollectionName).Find(bson.M{"timestamp": keyID}).One(&track)
+    err = session.DB(db.DBname).C(db.TrackCollection).Find(bson.M{"timestamp": keyID}).One(&track)
 
     return track, err
 }
@@ -93,7 +93,7 @@ func (db *DBInfo) GetField(keyID int64, field string) (string, bool) {
 
     allWasGood := true
 
-    err = session.DB(db.DBname).C(db.CollectionName).Find(bson.M{"timestamp": keyID}).Select(bson.M{field: 1}).One(&returnfield)
+    err = session.DB(db.DBname).C(db.TrackCollection).Find(bson.M{"timestamp": keyID}).Select(bson.M{field: 1}).One(&returnfield)
     if err != nil {
         allWasGood = false
     }
@@ -112,7 +112,7 @@ func (db *DBInfo) GetAll() []Track {
 
     var all []Track
 
-    err = session.DB(db.DBname).C(db.CollectionName).Find(bson.M{}).All(&all)
+    err = session.DB(db.DBname).C(db.TrackCollection).Find(bson.M{}).All(&all)
     if err != nil {
         return []Track{}
     }
