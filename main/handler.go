@@ -83,11 +83,12 @@ func HandlerTrack(w http.ResponseWriter, r *http.Request) {
         }
 
     } else if r.Method=="GET" {
-
         parts := strings.Split(r.URL.Path, "/")
+        requestString:=""
 
-        requestString := parts[4]
-        //fmt.Fprint(w, requestedID)
+        if len(parts)>4 { //this if block prevents  accessing space outside the array
+            requestString = parts[4]
+        }
 
         if !isNumeric(requestString) && requestString!="" {
             //check if the ID is numeric (and that the request was not for all tracks
@@ -98,7 +99,16 @@ func HandlerTrack(w http.ResponseWriter, r *http.Request) {
 
             switch len(parts) {
             case 4: //if the entire array is requested
-                fmt.Fprint(w, "This space for rent\n")
+
+                tracks := db.GetAll() //add all tracks to array
+                var ids []int64
+
+                for i:= 0; i < len(tracks);i++{
+                    ids = append(ids, tracks[i].Timestamp) //append all ids to new array
+                }
+                http.Header.Add(w.Header(), "content-type", "application/json")
+                json.NewEncoder(w).Encode(ids)
+                //fmt.Fprint(w, "This space for rent\n")
 
             case 5: //if a single track is requested
                 track, err := db.Get(requestedID) //try to fetch track by ID
@@ -118,6 +128,7 @@ func HandlerTrack(w http.ResponseWriter, r *http.Request) {
                     json.NewEncoder(w).Encode(track)
                 }else{ //if this track could not be fetched, throw 404
                     http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+                    fmt.Fprint(w, "Why are we here, just to suffer?")
                 }
 
             case 6: //if a single field is requested
@@ -156,6 +167,7 @@ func HandlerTrack(w http.ResponseWriter, r *http.Request) {
                 }
             default:
                 http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+                fmt.Fprint(w, "\noops I did a booboo")
             }
             //sjekk om vi har å gjøre med get array, get track, eller get field
             //hvis get array
@@ -169,72 +181,6 @@ func HandlerTrack(w http.ResponseWriter, r *http.Request) {
             //returner $FIELD
         }
     }
-//===================================================================
-//        parts :=strings.Split(r.URL.Path, "/")
-//
-//        if len(parts)>=4 { //Check whether a specific id is being requested
-//            requestedID, err := strconv.Atoi(parts[4])
-//
-//            if requestedID < LastID { //make sure requestedID is not out of bounds
-//                track := tracks[requestedID]
-//
-//                if err != nil {
-//                    //the track does not exist
-//                    http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-//                    json.NewEncoder(w).Encode(requestedID)
-//                    //fmt.Fprintf(w, "This is the first NotFound block\n")
-//                }
-//
-//                if requestedID <= LastID {
-//                    if len(parts) == 5 {
-//                        http.Header.Add(w.Header(), "content-type", "application/json")
-//                        requestedTrack := Track{
-//                            track.Id,
-//                            track.Hdate,
-//                            track.Pilot,
-//                            track.Glider,
-//                            track.GliderID,
-//                            track.TrackLength,
-//                            track.TrackURL,
-//                            track.Timestamp,
-//                        }
-//                        json.NewEncoder(w).Encode(requestedTrack)
-//                    } else if len(parts) == 6 {
-//                        switch strings.ToLower(parts[5]) {
-//                        case "pilot":
-//                            fmt.Fprintf(w, track.Pilot)
-//                        case "glider":
-//                            fmt.Fprintf(w, track.Glider)
-//                        case "glider_id":
-//                            fmt.Fprintf(w, track.GliderID)
-//                        case "track_length":
-//                            fmt.Fprintf(w, "%f", track.TrackLength)
-//                        case "h_date":
-//                            fmt.Fprintf(w, "%v", track.Hdate)
-//                        case "track_src_url":
-//                            fmt.Fprintf(w, "%f", track.TrackURL)
-//                        case "timestamp":
-//                            fmt.Fprintf(w, "%f", track.Timestamp)
-//                        default:
-//                            http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-//                            //fmt.Fprintf(w, "This is the second NotFound block\n")
-//                        }
-//                    }
-//                } else {
-//                    http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-//                    //fmt.Fprintf(w, "This is the third NotFound block\n")
-//                }
-//            }else{ //id is out of bounds, does not exist
-//                http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-//            }
-//        }else{
-//            //return array of all ids
-//            http.Header.Add(w.Header(), "content-type", "application/json")
-//            json.NewEncoder(w).Encode(ids)
-//        }
-//
-//    } else { //if
-//        http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 }
 
 

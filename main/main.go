@@ -80,7 +80,7 @@ func main() {
     apiStruct = Metadata{Uptime: "", Info:"Info for paragliding tracks.", Version: "v1" }
     http.HandleFunc("/paragliding/", HandlerAPIRedirect)
 	http.HandleFunc("/paragliding/api/", HandlerAPI)
-    http.HandleFunc("/paragliding/api/track/", HandlerTrack)
-    //http.HandleFunc("/testcase/", HandlerTest)
+    http.HandleFunc("/paragliding/api/track", HandlerTrack)
+    http.HandleFunc("/paragliding/api/ticker", HandlerTicker)
 	log.Fatal(http.ListenAndServe(port, nil))
 }

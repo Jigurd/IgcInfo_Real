@@ -24,6 +24,13 @@ func isNumeric(s string) bool { //Checks whether given string is numeric
     return value
 }
 
+func Min(a,b int) int{ //returns the lower of the two arguments
+    if a < b{
+        return a
+    } else {
+        return b
+    }
+}
 
 //returns monotonic time as an int64
 func Millisec() int64{
