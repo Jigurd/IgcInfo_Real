@@ -1,5 +1,5 @@
 [metadata.heroku]
-root-package = "Paragliding"
+root-package = "Paragliding/main"
 
 # Gopkg.toml example
 #
